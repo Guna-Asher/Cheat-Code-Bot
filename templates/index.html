@@ -255,6 +255,16 @@
       try {
         let base64data;
         if (isMobile) {
+          // Check if device camera is started
+          if (!deviceCamera.srcObject) {
+            await startDeviceCamera();
+            // Wait a bit for the video to load
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          // Ensure video dimensions are available
+          if (deviceCamera.videoWidth === 0 || deviceCamera.videoHeight === 0) {
+            throw new Error("Camera not ready. Please try again.");
+          }
           // Capture from device camera video element
           const canvas = document.createElement("canvas");
           canvas.width = deviceCamera.videoWidth;
