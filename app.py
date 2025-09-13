@@ -15,7 +15,7 @@ cache = {}
 question_cache = {}
 
 # Configure Gemini API
-genai.configure(api_key="AIzaSyBxQxzXCDT4xFLq0o8Fcxt45SniZUjnAao")
+genai.configure(api_key="AIzaSyBckWBfyGBrD-j_ulaWUvm0mKl8e0HKC0Y")
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -86,3 +86,4 @@ def home():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
