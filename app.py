@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import base64
 import google.generativeai as genai
@@ -80,10 +80,10 @@ def analyze():
 
     except Exception as e:
         return jsonify({"reply": f"Error: {str(e)}"}), 500
+
 @app.route("/", methods=["GET"])
 def home():
-    return "Server is running. Ready to receive image data!"
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
