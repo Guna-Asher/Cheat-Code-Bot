@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>IP Camera + Gemini Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -117,13 +117,35 @@
     @media (orientation: landscape) and (max-width: 640px) {
       .grid.grid-cols-1.lg\\:grid-cols-2 {
         grid-template-columns: 1fr 1fr;
-        height: 60vh !important;
+        height: auto !important;
+        min-height: 70vh;
       }
       #chat-box {
         height: 200px !important;
+        max-height: 200px;
       }
       .camera-feed {
-        max-height: 180px;
+        max-height: 150px !important;
+        height: 150px !important;
+        object-fit: cover;
+      }
+      .aspect-w-16.aspect-h-9 {
+        aspect-ratio: 16 / 9;
+        max-height: 150px !important;
+        height: 150px !important;
+      }
+      .camera-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .camera-container {
+        flex: 1;
+        min-height: 0;
+      }
+      .buttons-container {
+        flex-shrink: 0;
+        margin-top: 0.5rem;
       }
       .features-section {
         display: none;
@@ -132,6 +154,15 @@
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+  <!-- Orientation warning for mobile portrait -->
+  <div id="orientationWarning" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden">
+    <div class="text-center text-white p-8">
+      <div class="text-6xl mb-4">📱</div>
+      <h2 class="text-2xl font-bold mb-4">Please Rotate Your Device</h2>
+      <p class="text-lg">For the best experience, please rotate your device to landscape mode.</p>
+    </div>
+  </div>
+
   <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header with animated icon -->
     <div class="text-center mb-8" data-aos="fade-down">
@@ -157,28 +188,28 @@
             <i data-feather="video" class="mr-2"></i> Live Camera Feed
           </h2>
         </div>
-        <div class="p-4">
-          <div class="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+        <div class="p-4 camera-section">
+          <div class="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center camera-container">
             <!-- Video element for device camera -->
             <video id="deviceCamera" autoplay playsinline muted class="camera-feed hidden"></video>
             <!-- Image element for IP camera -->
             <img id="cameraFeed" src="http://static.photos/technology/1024x576/42" alt="Camera Feed" class="camera-feed w-full h-auto">
           </div>
-          <div class="mt-6 flex justify-center space-x-4 flex-wrap">
-            <button id="startBtn" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full glow-btn flex items-center">
-              <i data-feather="play" class="mr-2"></i> Start
+          <div class="mt-4 flex justify-center space-x-2 flex-wrap gap-2 buttons-container">
+            <button id="startBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full glow-btn flex items-center text-sm">
+              <i data-feather="play" class="mr-1 w-4 h-4"></i> Start
             </button>
-            <button id="screenshotBtn" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full glow-btn pulse flex items-center">
-              <i data-feather="camera" class="mr-2"></i> Capture
+            <button id="screenshotBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full glow-btn pulse flex items-center text-sm">
+              <i data-feather="camera" class="mr-1 w-4 h-4"></i> Capture
             </button>
-            <button id="autoCaptureBtn" class="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-full glow-btn flex items-center">
-              <i data-feather="repeat" class="mr-2"></i> Auto Capture
+            <button id="autoCaptureBtn" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-full glow-btn flex items-center text-sm">
+              <i data-feather="repeat" class="mr-1 w-4 h-4"></i> Auto
             </button>
-            <button id="stopBtn" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-full glow-btn flex items-center">
-              <i data-feather="stop-circle" class="mr-2"></i> Stop
+            <button id="stopBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-full glow-btn flex items-center text-sm">
+              <i data-feather="stop-circle" class="mr-1 w-4 h-4"></i> Stop
             </button>
-            <label class="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-full glow-btn flex items-center cursor-pointer">
-              <i data-feather="upload" class="mr-2"></i> Upload Image
+            <label class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-full glow-btn flex items-center cursor-pointer text-sm">
+              <i data-feather="upload" class="mr-1 w-4 h-4"></i> Upload
               <input type="file" id="imageUpload" accept="image/*" class="hidden">
             </label>
           </div>
@@ -257,6 +288,26 @@
     const spinner = document.getElementById("loadingSpinner");
     const cameraFeed = document.getElementById("cameraFeed");
     const deviceCamera = document.getElementById("deviceCamera");
+    const orientationWarning = document.getElementById("orientationWarning");
+
+    // Check device orientation and show warning if needed
+    function checkOrientation() {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isPortrait = window.innerHeight > window.innerWidth;
+
+      if (isMobile && isPortrait) {
+        orientationWarning.classList.remove("hidden");
+      } else {
+        orientationWarning.classList.add("hidden");
+      }
+    }
+
+    // Check orientation on load and resize
+    window.addEventListener("load", checkOrientation);
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(checkOrientation, 100); // Small delay for orientation change
+    });
 
     // Your IP Camera snapshot URL
     // const snapshotUrl = "http://192.168.225.53:8080/shot.jpg";
