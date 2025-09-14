@@ -37,7 +37,7 @@ def analyze():
         image_bytes = base64.b64decode(image_data)
 
         # Create Gemini model
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        model = genai.GenerativeModel("gemini-1.5-flash")
 
         # First, extract questions from the image
         extract_response = model.generate_content([
