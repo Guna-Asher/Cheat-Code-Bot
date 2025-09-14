@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
   <title>IP Camera + Gemini Vision</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -83,6 +83,50 @@
       }
       .camera-feed {
         max-height: 250px;
+      }
+    }
+    /* Portrait orientation adjustments */
+    @media (orientation: portrait) and (max-width: 640px) {
+      .grid.grid-cols-1.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+        height: auto !important;
+      }
+      #chat-box {
+        height: 250px !important;
+      }
+      .camera-feed {
+        max-height: 200px;
+      }
+      .mt-16 {
+        margin-top: 1rem;
+      }
+      .features-section {
+        display: none;
+      }
+      .floating {
+        animation: none;
+      }
+      h1 {
+        font-size: 1.5rem !important;
+      }
+      p {
+        font-size: 0.9rem !important;
+      }
+    }
+    /* Landscape orientation for mobile */
+    @media (orientation: landscape) and (max-width: 640px) {
+      .grid.grid-cols-1.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr 1fr;
+        height: 60vh !important;
+      }
+      #chat-box {
+        height: 200px !important;
+      }
+      .camera-feed {
+        max-height: 180px;
+      }
+      .features-section {
+        display: none;
       }
     }
   </style>
@@ -171,7 +215,7 @@
     </div>
 
     <!-- Features section -->
-    <div class="mt-16" data-aos="fade-up">
+    <div class="mt-16 features-section" data-aos="fade-up">
       <h2 class="text-2xl font-bold text-center text-gray-900 mb-8">Key Features</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
