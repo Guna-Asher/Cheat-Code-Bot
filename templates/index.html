@@ -111,6 +111,19 @@
         grid-template-columns: repeat(3, 1fr);
       }
     }
+    
+    /* Q&A specific styling */
+    .qa-container {
+      line-height: 1.6;
+    }
+    .qa-question {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .qa-answer {
+      font-weight: bold;
+      color: #059669; /* Green color for answers to distinguish them */
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -399,19 +412,39 @@
       bubble.classList.add("chat-bubble", type === "user" ? "user-bubble" : "bot-bubble");
 
       if (type === "bot") {
-        bubble.innerHTML = `
-          <div class="flex items-start">
-            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-              <i data-feather="cpu" class="text-indigo-600 w-4 h-4"></i>
+        // Check if content contains HTML tags (Q&A format)
+        if (typeof content === 'string' && (content.includes('<b>') || content.includes('<br>'))) {
+          bubble.innerHTML = `
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                <i data-feather="cpu" class="text-indigo-600 w-4 h-4"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">Gemini Vision</p>
+                <div class="mt-1 text-sm text-gray-700 qa-container">${content}</div>
+              </div>
             </div>
-            <div class="ml-3">
-              <p class="text-sm font-medium text-gray-900">Gemini Vision</p>
-              <div class="mt-1 text-sm text-gray-700">${content}</div>
+          `;
+        } else {
+          bubble.innerHTML = `
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                <i data-feather="cpu" class="text-indigo-600 w-4 h-4"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">Gemini Vision</p>
+                <p class="mt-1 text-sm text-gray-700">${content}</p>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       } else {
-        bubble.appendChild(content);
+        // Handle user content (could be text or image)
+        if (typeof content === 'string') {
+          bubble.innerHTML = content;
+        } else {
+          bubble.appendChild(content);
+        }
       }
 
       chatBox.appendChild(bubble);
