@@ -4,6 +4,7 @@ import base64
 import google.generativeai as genai
 import os
 import hashlib
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -62,17 +63,17 @@ def analyze():
                 q_hash = hashlib.md5(q.encode('utf-8')).hexdigest()
                 if q_hash in question_cache:
                     a = question_cache[q_hash]
-                    response_parts.append(f"{q}\nCached Answer: {a}")
+                    response_parts.append(f"<b>{q}</b><br><b>Answer:</b> <b>{a}</b>")
                 else:
-                    # Generate answer
+                    # Generate answer with instruction to keep it brief
                     ans_response = model.generate_content([
                         {"mime_type": "image/jpeg", "data": image_bytes},
-                        f"Answer this question accurately based on the image, interpreting any graphs or charts if present, and standard knowledge: {q}"
+                        f"Answer this question accurately based on the image, interpreting any graphs or charts if present, and standard knowledge. Keep the answer brief and direct: {q}"
                     ])
                     a = ans_response.text if ans_response.text else "No answer"
                     question_cache[q_hash] = a
-                    response_parts.append(f"{q}\n{a}")
-            reply = '\n\n'.join(response_parts)
+                    response_parts.append(f"<b>{q}</b><br><b>Answer:</b> <b>{a}</b>")
+            reply = '<br><br>'.join(response_parts)
 
         # Cache the full response
         cache[image_hash] = reply
