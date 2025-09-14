@@ -215,16 +215,16 @@
     const deviceCamera = document.getElementById("deviceCamera");
 
     // Your IP Camera snapshot URL
-    const snapshotUrl = "http://192.168.225.53:8080/shot.jpg";
+    // const snapshotUrl = "http://192.168.225.53:8080/shot.jpg";
 
     // Detect if device is mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // Stream from device camera if mobile
+    // Stream from device camera (all devices)
     async function startDeviceCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
+          video: true,
           audio: false,
         });
         deviceCamera.srcObject = stream;
@@ -235,22 +235,16 @@
       }
     }
 
-    // Start IP camera feed
-    function startIPCamera() {
-      cameraFeed.src = snapshotUrl + "?t=" + new Date().getTime(); // prevent caching
-      cameraFeed.classList.remove("hidden");
-      deviceCamera.classList.add("hidden");
+    // Start device camera feed (used for all devices)
+    function startDeviceCameraFeed() {
+      deviceCamera.classList.remove("hidden");
+      cameraFeed.classList.add("hidden");
     }
 
     // Start button handler
     document.getElementById("startBtn").addEventListener("click", () => {
-      if (isMobile) {
-        startDeviceCamera();
-        addBubble("📱 Device camera started", "bot");
-      } else {
-        startIPCamera();
-        addBubble("📡 Live IP camera feed connected and streaming", "bot");
-      }
+      startDeviceCamera();
+      addBubble("📷 Device camera started", "bot");
     });
 
     // Capture screenshot from the active camera feed
@@ -258,39 +252,26 @@
       spinner.classList.remove("hidden");
       try {
         let base64data;
-        if (isMobile) {
-          // Check if device camera is started
-          if (!deviceCamera.srcObject) {
-            await startDeviceCamera();
-            // Wait a bit for the video to load
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-          // Ensure video dimensions are available
-          if (deviceCamera.videoWidth === 0 || deviceCamera.videoHeight === 0) {
-            throw new Error("Camera not ready. Please try again.");
-          }
-          // Capture from device camera video element
-          const canvas = document.createElement("canvas");
-          canvas.width = deviceCamera.videoWidth;
-          canvas.height = deviceCamera.videoHeight;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(deviceCamera, 0, 0, canvas.width, canvas.height);
-          base64data = canvas.toDataURL("image/jpeg");
-        } else {
-          // Fetch snapshot from IP camera URL
-          const response = await fetch(snapshotUrl);
-          const blob = await response.blob();
-          base64data = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
+        // Check if device camera is started
+        if (!deviceCamera.srcObject) {
+          await startDeviceCamera();
+          // Wait a bit for the video to load
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
+        // Ensure video dimensions are available
+        if (deviceCamera.videoWidth === 0 || deviceCamera.videoHeight === 0) {
+          throw new Error("Camera not ready. Please try again.");
+        }
+        // Capture from device camera video element
+        const canvas = document.createElement("canvas");
+        canvas.width = deviceCamera.videoWidth;
+        canvas.height = deviceCamera.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(deviceCamera, 0, 0, canvas.width, canvas.height);
+        base64data = canvas.toDataURL("image/jpeg");
 
-        // Update camera feed image if desktop
-        if (!isMobile) {
-          cameraFeed.src = base64data;
-        }
+        // Update camera feed image
+        cameraFeed.src = base64data;
 
         // Show snapshot in chat bubble
         const img = document.createElement("img");
